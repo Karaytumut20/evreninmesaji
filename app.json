@@ -4,7 +4,7 @@
     "slug": "evrenin-mesaji",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logos.jpg",
+    "icon": "./assets/images/logos.png",
     "scheme": "evreninmesaji",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -15,7 +15,7 @@
     "android": {
       "package": "com.umutkaraytu.evreninmesaji",
       "versionCode": 1,
-      "icon": "./assets/images/logos.jpg",
+      "icon": "./assets/images/logos.png",
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
@@ -32,7 +32,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-screen.jpg",
+          "image": "./assets/images/splash-screen.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#1a0033",
@@ -51,7 +51,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/logos.jpg",
+          "icon": "./assets/images/logos.png",
           "color": "#ffffff"
         }
       ],
