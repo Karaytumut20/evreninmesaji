@@ -15,6 +15,7 @@
     "android": {
       "package": "com.umutkaraytu.evreninmesaji",
       "versionCode": 1,
+      "icon": "./assets/images/logos.jpg",
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE",
@@ -43,8 +44,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "android_app_id": "ca-app-pub-3940256099942544~3347511713",
-          "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
+          "android_app_id": "ca-app-pub-4816381866965413~3301951102",
+          "ios_app_id": "ca-app-pub-4816381866965413~3301951102"
         }
       ],
       [
@@ -59,7 +60,8 @@
         {
           "android": {
             "useAndroidX": true,
-            "enableProguardInReleaseBuilds": true
+            "enableProguardInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true
           }
         }
       ]
@@ -67,6 +69,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "03bfb7b8-3d1d-4655-a5d0-2981bf95e900"
+      }
     }
   }
 }
