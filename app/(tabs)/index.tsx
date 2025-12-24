@@ -1,9 +1,9 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Haptics from "expo-haptics"; // Titreşim için
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Notifications from "expo-notifications"; // Bildirim için
-import * as Sharing from "expo-sharing"; // Paylaşım için
+import * as Notifications from "expo-notifications";
+import * as Sharing from "expo-sharing";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,9 +15,33 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ViewShot from "react-native-view-shot"; // Ekran görüntüsü için
+import {
+  AdEventType,
+  BannerAd,
+  BannerAdSize,
+  InterstitialAd,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import ViewShot from "react-native-view-shot";
 
-// --- BİLDİRİM AYARLARI ---
+// --- REKLAM ID AYARLARI ---
+// NOT: Test ederken __DEV__ true olduğu için otomatik Test ID kullanır.
+// Markete atarken aşağıdaki 'ca-app-pub-...' kısımlarına kendi ID'lerini yaz.
+
+// 1. GEÇİŞ REKLAMI ID (Slash / işareti olan)
+const interstitialId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-4816381866965413/3605203430";
+
+// 2. BANNER REKLAM ID (Slash / işareti olan)
+const bannerId = __DEV__
+  ? TestIds.BANNER
+  : "ca-app-pub-4816381866965413/2489215274";
+
+const interstitial = InterstitialAd.createForAdRequest(interstitialId, {
+  requestNonPersonalizedAdsOnly: true,
+});
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -48,15 +72,41 @@ export default function App() {
   const [isRevealed, setIsRevealed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [checkingStorage, setCheckingStorage] = useState<boolean>(true);
+  const [adLoaded, setAdLoaded] = useState<boolean>(false);
 
   const viewShotRef = useRef<any>(null);
 
   useEffect(() => {
     checkDailyStatus();
     scheduleDailyNotification();
+
+    // --- GEÇİŞ REKLAMI DİNLEYİCİLERİ ---
+    const unsubscribeLoaded = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setAdLoaded(true);
+      }
+    );
+
+    const unsubscribeClosed = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        // Reklam kapatılınca mesajı göster! (Kritik nokta burası)
+        setAdLoaded(false);
+        interstitial.load(); // Bir sonraki tıklama için şimdiden yükle
+        revealMessage();
+      }
+    );
+
+    // İlk açılışta reklamı yükle
+    interstitial.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+    };
   }, []);
 
-  // Bildirim Kurma
   const scheduleDailyNotification = async () => {
     const { status } = await Notifications.getPermissionsAsync();
     if (status !== "granted") {
@@ -78,7 +128,6 @@ export default function App() {
     });
   };
 
-  // Uygulama açılınca "Bugün mesaj çekmiş mi?" kontrolü
   const checkDailyStatus = async () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
@@ -96,17 +145,26 @@ export default function App() {
     }
   };
 
+  // --- BUTONA BASILINCA ---
   const handlePress = () => {
     if (isRevealed) {
       Alert.alert("Mesajın Burada", "Evrenin bugünkü mesajı zaten ekranında.");
       return;
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    revealMessage();
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Eğer reklam hazırsan GÖSTER, değilse direkt mesajı aç (Kullanıcıyı bekletme)
+    if (adLoaded) {
+      interstitial.show();
+    } else {
+      revealMessage();
+    }
   };
 
   const revealMessage = () => {
     setLoading(true);
+    // Reklamdan sonra kısa bir yükleme efekti
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * messages.length);
       const newMessage = messages[randomIndex];
@@ -116,33 +174,25 @@ export default function App() {
       setDailyMessage(newMessage);
       setIsRevealed(true);
       setLoading(false);
-
-      // İŞTE BURADA OTOMATİK KAYDEDİYORUZ 👇
       saveData(newMessage);
-    }, 2000);
+    }, 1500);
   };
 
-  // --- KAYIT İŞLEMİ (HEM GÜNLÜK, HEM SON DURUM) ---
   const saveData = async (msg: string) => {
     try {
       const today = new Date().toISOString().slice(0, 10);
-
-      // 1. Son durumu kaydet (Yarın gelmesi için)
       await AsyncStorage.setItem("lastDate", today);
       await AsyncStorage.setItem("savedMessage", msg);
 
-      // 2. GÜNLÜK LİSTESİNE EKLE (ARŞİVLEME)
       const currentHistoryStr = await AsyncStorage.getItem("messageHistory");
       let currentHistory = currentHistoryStr
         ? JSON.parse(currentHistoryStr)
         : [];
 
-      // Eğer bugün zaten eklenmemişse listeye ekle
       const alreadySaved = currentHistory.some(
         (item: any) => item.date === today
       );
       if (!alreadySaved) {
-        // Yeni mesajı listenin en başına ekle
         currentHistory.unshift({ date: today, message: msg });
         await AsyncStorage.setItem(
           "messageHistory",
@@ -154,7 +204,6 @@ export default function App() {
     }
   };
 
-  // Resim Paylaşma
   const shareImage = async () => {
     try {
       if (viewShotRef.current) {
@@ -282,6 +331,19 @@ export default function App() {
           </TouchableOpacity>
         )}
       </LinearGradient>
+
+      {/* --- BANNER REKLAM (Sayfanın En Altında) --- */}
+      <View
+        style={{ width: "100%", alignItems: "center", backgroundColor: "#000" }}
+      >
+        <BannerAd
+          unitId={bannerId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+          }}
+        />
+      </View>
     </View>
   );
 }

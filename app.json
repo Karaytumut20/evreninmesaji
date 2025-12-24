@@ -10,10 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.adiniz.evreninmesaji"
+      "bundleIdentifier": "com.umutkaraytu.evreninmesaji"
     },
     "android": {
-      "package": "com.adiniz.evreninmesaji",
+      "package": "com.umutkaraytu.evreninmesaji",
       "adaptiveIcon": {
         "backgroundColor": "#1a0033",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -46,6 +46,15 @@
         {
           "android_app_id": "ca-app-pub-3940256099942544~3347511713",
           "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useAndroidX": true,
+            "enableProguardInReleaseBuilds": true
+          }
         }
       ]
     ],

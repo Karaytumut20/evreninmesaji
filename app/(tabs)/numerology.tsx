@@ -12,11 +12,22 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+// AdMob Kütüphanesini ekliyoruz
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 export default function NumerologyScreen() {
   const [name, setName] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Kendi Banner Reklam Birimi ID'ni buraya yaz (Slash / işareti olan)
+  const bannerAdUnitId = __DEV__
+    ? TestIds.BANNER
+    : "ca-app-pub-4816381866965413/2489215274";
 
   const analyzeName = () => {
     if (name.trim().length < 2) return;
@@ -27,7 +38,7 @@ export default function NumerologyScreen() {
     setLoading(true);
 
     setTimeout(() => {
-      // Basit bir analiz mantığı (Geliştirilebilir)
+      // Basit bir analiz mantığı
       const comments = [
         "Liderlik vasfın çok yüksek, öncü bir ruhun var.",
         "Duygusal zekan çok gelişmiş, hislerin kuvvetli.",
@@ -37,9 +48,9 @@ export default function NumerologyScreen() {
         "Sorumluluk sahibisin, çevren sana güveniyor.",
         "Gizemli bir havan var, insanlar seni merak ediyor.",
         "Bolluk ve bereket enerjisi seninle.",
-      ];
+      ]; //
 
-      // İsmin uzunluğuna veya harflerine göre rastgele bir seçim yapıyormuş gibi hissettir
+      // İsmin uzunluğuna veya harflerine göre rastgele bir seçim
       const randomComment =
         comments[Math.floor(Math.random() * comments.length)];
       setResult(
@@ -96,6 +107,17 @@ export default function NumerologyScreen() {
               <Text style={styles.resultText}>{result}</Text>
             </View>
           )}
+
+          {/* --- BANNER REKLAM (En Altta Sabit) --- */}
+          <View style={styles.adContainer}>
+            <BannerAd
+              unitId={bannerAdUnitId}
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: true,
+              }}
+            />
+          </View>
         </LinearGradient>
       </View>
     </TouchableWithoutFeedback>
@@ -109,6 +131,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    paddingBottom: 80, // Reklamın üzerine binmemesi için alt boşluk artırıldı
   },
   header: { alignItems: "center", marginBottom: 40 },
   title: {
@@ -158,5 +181,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     lineHeight: 26,
+  },
+  adContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: 10, // Güvenli alan
   },
 });
