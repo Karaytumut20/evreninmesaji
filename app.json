@@ -4,7 +4,7 @@
     "slug": "evrenin-mesaji",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logos.jpg",
     "scheme": "evreninmesaji",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -14,25 +14,24 @@
     },
     "android": {
       "package": "com.umutkaraytu.evreninmesaji",
-      "adaptiveIcon": {
-        "backgroundColor": "#1a0033",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.SCHEDULE_EXACT_ALARM"
+      ]
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.ico"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-screen.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#1a0033",
@@ -46,6 +45,13 @@
         {
           "android_app_id": "ca-app-pub-3940256099942544~3347511713",
           "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/logos.jpg",
+          "color": "#ffffff"
         }
       ],
       [

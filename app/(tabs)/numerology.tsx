@@ -12,7 +12,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-// AdMob Kütüphanesini ekliyoruz
 import {
   BannerAd,
   BannerAdSize,
@@ -24,7 +23,7 @@ export default function NumerologyScreen() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Kendi Banner Reklam Birimi ID'ni buraya yaz (Slash / işareti olan)
+  // Buraya '/' işaretli Banner ID'ni yaz:
   const bannerAdUnitId = __DEV__
     ? TestIds.BANNER
     : "ca-app-pub-4816381866965413/2489215274";
@@ -32,13 +31,11 @@ export default function NumerologyScreen() {
   const analyzeName = () => {
     if (name.trim().length < 2) return;
 
-    // Haptik Geri Bildirim (Titreşim)
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Keyboard.dismiss();
     setLoading(true);
 
     setTimeout(() => {
-      // Basit bir analiz mantığı
       const comments = [
         "Liderlik vasfın çok yüksek, öncü bir ruhun var.",
         "Duygusal zekan çok gelişmiş, hislerin kuvvetli.",
@@ -48,9 +45,8 @@ export default function NumerologyScreen() {
         "Sorumluluk sahibisin, çevren sana güveniyor.",
         "Gizemli bir havan var, insanlar seni merak ediyor.",
         "Bolluk ve bereket enerjisi seninle.",
-      ]; //
+      ];
 
-      // İsmin uzunluğuna veya harflerine göre rastgele bir seçim
       const randomComment =
         comments[Math.floor(Math.random() * comments.length)];
       setResult(
@@ -108,7 +104,7 @@ export default function NumerologyScreen() {
             </View>
           )}
 
-          {/* --- BANNER REKLAM (En Altta Sabit) --- */}
+          {/* --- BANNER REKLAM --- */}
           <View style={styles.adContainer}>
             <BannerAd
               unitId={bannerAdUnitId}
@@ -131,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    paddingBottom: 80, // Reklamın üzerine binmemesi için alt boşluk artırıldı
+    paddingBottom: 80,
   },
   header: { alignItems: "center", marginBottom: 40 },
   title: {
@@ -187,6 +183,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     alignItems: "center",
-    paddingBottom: 10, // Güvenli alan
+    paddingBottom: 10,
   },
 });

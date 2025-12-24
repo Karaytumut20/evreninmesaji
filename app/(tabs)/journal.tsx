@@ -61,7 +61,7 @@ export default function JournalScreen() {
         />
         <Text style={styles.dateText}>{item.date}</Text>
       </View>
-      <Text style={styles.messageText}>"{item.message}"</Text>
+      <Text style={styles.messageText}>{item.message}</Text>
       <View style={styles.decorationLine} />
     </View>
   );

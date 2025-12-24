@@ -4,6 +4,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Notifications from "expo-notifications";
 import * as Sharing from "expo-sharing";
+import * as StoreReview from "expo-store-review"; // YENİ EKLENDİ
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,28 +18,18 @@ import {
 } from "react-native";
 import {
   AdEventType,
-  BannerAd,
-  BannerAdSize,
   InterstitialAd,
   TestIds,
 } from "react-native-google-mobile-ads";
 import ViewShot from "react-native-view-shot";
 
-// --- REKLAM ID AYARLARI ---
-// NOT: Test ederken __DEV__ true olduğu için otomatik Test ID kullanır.
-// Markete atarken aşağıdaki 'ca-app-pub-...' kısımlarına kendi ID'lerini yaz.
-
-// 1. GEÇİŞ REKLAMI ID (Slash / işareti olan)
-const interstitialId = __DEV__
+// --- GEÇİŞ REKLAMI ID ---
+// Buraya '/' işaretli Interstitial ID'ni yaz:
+const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
   : "ca-app-pub-4816381866965413/3605203430";
 
-// 2. BANNER REKLAM ID (Slash / işareti olan)
-const bannerId = __DEV__
-  ? TestIds.BANNER
-  : "ca-app-pub-4816381866965413/2489215274";
-
-const interstitial = InterstitialAd.createForAdRequest(interstitialId, {
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   requestNonPersonalizedAdsOnly: true,
 });
 
@@ -65,6 +56,9 @@ const messages = [
   "Kalbinin sesini dinle, mantığın bugün seni yanıltabilir.",
   "Geçmişi serbest bırak, ellerin doluysa yeni hediyeleri tutamazsın.",
   "Bir mucizeye inanmak, onu çağırmanın ilk adımıdır.",
+  "Bugün karşına çıkan sayılara dikkat et (11:11, 22:22).",
+  "Sessiz kalmak, bazen en güçlü cevaptır.",
+  "İçindeki potansiyel sandığından çok daha büyük.",
 ];
 
 export default function App() {
@@ -80,7 +74,6 @@ export default function App() {
     checkDailyStatus();
     scheduleDailyNotification();
 
-    // --- GEÇİŞ REKLAMI DİNLEYİCİLERİ ---
     const unsubscribeLoaded = interstitial.addAdEventListener(
       AdEventType.LOADED,
       () => {
@@ -91,14 +84,12 @@ export default function App() {
     const unsubscribeClosed = interstitial.addAdEventListener(
       AdEventType.CLOSED,
       () => {
-        // Reklam kapatılınca mesajı göster! (Kritik nokta burası)
         setAdLoaded(false);
-        interstitial.load(); // Bir sonraki tıklama için şimdiden yükle
+        interstitial.load();
         revealMessage();
       }
     );
 
-    // İlk açılışta reklamı yükle
     interstitial.load();
 
     return () => {
@@ -145,16 +136,13 @@ export default function App() {
     }
   };
 
-  // --- BUTONA BASILINCA ---
   const handlePress = () => {
     if (isRevealed) {
       Alert.alert("Mesajın Burada", "Evrenin bugünkü mesajı zaten ekranında.");
       return;
     }
-
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    // Eğer reklam hazırsan GÖSTER, değilse direkt mesajı aç (Kullanıcıyı bekletme)
     if (adLoaded) {
       interstitial.show();
     } else {
@@ -164,13 +152,11 @@ export default function App() {
 
   const revealMessage = () => {
     setLoading(true);
-    // Reklamdan sonra kısa bir yükleme efekti
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * messages.length);
       const newMessage = messages[randomIndex];
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
       setDailyMessage(newMessage);
       setIsRevealed(true);
       setLoading(false);
@@ -218,6 +204,15 @@ export default function App() {
     }
   };
 
+  // --- OYLAMA FONKSİYONU ---
+  const handleRateUs = async () => {
+    if (await StoreReview.hasAction()) {
+      StoreReview.requestReview();
+    } else {
+      Alert.alert("Teşekkürler", "Desteğin için teşekkür ederiz!");
+    }
+  };
+
   if (checkingStorage) {
     return (
       <View
@@ -244,6 +239,12 @@ export default function App() {
         style={styles.background}
       >
         <View style={styles.header}>
+          <View style={styles.topRow}>
+            <TouchableOpacity onPress={handleRateUs} style={styles.rateButton}>
+              <MaterialCommunityIcons name="star" size={24} color="#FFD700" />
+            </TouchableOpacity>
+          </View>
+
           <MaterialCommunityIcons
             name="moon-waning-crescent"
             size={50}
@@ -331,19 +332,6 @@ export default function App() {
           </TouchableOpacity>
         )}
       </LinearGradient>
-
-      {/* --- BANNER REKLAM (Sayfanın En Altında) --- */}
-      <View
-        style={{ width: "100%", alignItems: "center", backgroundColor: "#000" }}
-      >
-        <BannerAd
-          unitId={bannerId}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: true,
-          }}
-        />
-      </View>
     </View>
   );
 }
@@ -356,7 +344,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
   },
-  header: { alignItems: "center", marginBottom: 30 },
+  header: { alignItems: "center", marginBottom: 30, width: "100%" },
+  topRow: { position: "absolute", top: 10, right: 20, zIndex: 10 },
+  rateButton: { padding: 10 },
   title: {
     fontSize: 32,
     fontWeight: "bold",
